@@ -7,14 +7,15 @@ const router = express.Router();
 
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
 
-  if (!email || !password) {
+  if (!normalizedEmail || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
   }
 
   const user = db
     .prepare('SELECT id, name, email, password FROM users WHERE email = ?')
-    .get(email);
+    .get(normalizedEmail);
 
   if (!user) {
     return res.status(401).json({ message: 'Invalid credentials' });

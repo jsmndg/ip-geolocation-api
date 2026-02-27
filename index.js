@@ -8,7 +8,22 @@ const authMiddleware = require('./middleware/authMiddleware');
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = new Set([
+  'https://ip-geolocation-silk.vercel.app',
+  'https://ip-geolocation-silk.vercel.app/',
+]);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('Not allowed by CORS'));
+    },
+  })
+);
 app.use(express.json());
 
 app.get('/api/health', (_req, res) => {

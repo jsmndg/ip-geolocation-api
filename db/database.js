@@ -31,15 +31,25 @@ CREATE TABLE IF NOT EXISTS search_history (
 `);
 
 function seedDefaultUser() {
-  const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get();
-  if (userCount.count > 0) {
-    return;
-  }
-
   const hashedPassword = bcrypt.hashSync('password123', 10);
-  db.prepare(
-    'INSERT INTO users (name, email, password) VALUES (?, ?, ?)'
-  ).run('Test User', 'test@example.com', hashedPassword);
+  const defaultUsers = [
+    { name: 'Required User', email: 'user@example.com' },
+    { name: 'Test User', email: 'test@example.com' },
+  ];
+
+  for (const user of defaultUsers) {
+    const existingUser = db
+      .prepare('SELECT id FROM users WHERE email = ?')
+      .get(user.email);
+
+    if (existingUser) {
+      continue;
+    }
+
+    db
+      .prepare('INSERT INTO users (name, email, password) VALUES (?, ?, ?)')
+      .run(user.name, user.email, hashedPassword);
+  }
 }
 
 seedDefaultUser();
